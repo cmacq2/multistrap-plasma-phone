@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# A simple wrapper around the multistrap/driver.sh that uses matching defaults:
+#
+# SRCDIR = phone-image/multistrap
+# BUILDDIR = <directory from which the wrapper is invoked>
+# DEBIAN_ARCH = aarch64
+#
+. "`dirname $0`/../multistrap/driver.sh" && \
+run_driver_script HELP_DESCRIPTION="build Plasma Mobile phone images" SRCDIR="\$SCRIPT_DIR/multistrap" BUILDDIR="$(pwd)" DEBIAN_ARCH=aarch64 -- "$@"
