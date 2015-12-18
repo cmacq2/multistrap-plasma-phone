@@ -1,0 +1,13 @@
+Codename: @CODENAME@
+Components: plasma-mobile
+Suite: unstable
+AlsoAcceptFor: sid unstable @CODENAME@
+Architectures: @ARCH@ source
+Origin: @DOMAIN@
+Version: @VERSION@
+Label: Plasma Mobile
+Description: Local repository for custom Plasma Mobile packages.
+Uploaders: uploaders
+SignWith: @REPOKEY@
+Log: reprepro-@CODENAME@.log
+Valid-For: 7d

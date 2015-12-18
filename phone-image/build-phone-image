@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# A simple wrapper around the multistrap/driver.sh that uses matching defaults:
+# A simple wrapper around the driver/driver.sh for multistrap that uses matching defaults:
 #
 # SRCDIR = phone-image/multistrap
 # BUILDDIR = <directory from which the wrapper is invoked>

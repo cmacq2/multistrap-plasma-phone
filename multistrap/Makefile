@@ -1,6 +1,5 @@
-#!/usr/bin/make
 #
-# Makefile to synthesis multistrap configuration from various repository configuration files
+# Makefile to synthesise multistrap configuration from various repository configuration files
 # and then build the resulting root filesystem.
 #
 
@@ -28,8 +27,8 @@ buildinfo                : print values of configurable VARIABLES.
 clean                    : delete build directory (BUILDDIR)
 configure                : generate multistrap configuration file.
 help                     : display this 'help' text.
-rebuild                  : update (redo) a previous 'build'.
-reconfigure              : update (redo) a previous 'configure'.
+rebuild                  : update (clean and redo) a previous 'build'.
+reconfigure              : update (clean and redo) a previous 'configure'.
 
 The following paths may be set to customise the build:
 
@@ -128,7 +127,7 @@ endif
 DEBIAN_ARCH ?=
 DEBIAN_MULTIARCH ?=
 MULTISTRAP_ARGS ?=
-DEBIAN_PACKAGES ?= locales bash apt aptitude fakeroot fakechroot debconf-utils systemd systemd-sysv
+DEBIAN_PACKAGES ?= locales bash apt aptitude fakeroot fakechroot debconf-utils systemd systemd-sysv ssh
 
 DEBIAN_DEFAULT_REPO ?=
 
@@ -378,12 +377,14 @@ endif
 endif # endif for is HOOKS empty?
 endif # endif for origin of HOOKS
 
-override MULTISTRAP_ROOT_DIR = $(BUILDDIR)/root
-override MULTISTRAP_HOOK_DIR = $(BUILDDIR)/hooks
-override REPOSITORY_DIR = $(BUILDDIR)/repos
-override MULTISTRAP_CFG = $(BUILDDIR)/multistrap.cfg
-override MULTISTRAP_IMAGE_TAR = $(BUILDDIR)/$(if $(DEBIAN_ARCH),rootfs-$(DEBIAN_ARCH).tar,rootfs.tar)
-override STAMP_FILE = $(BUILDDIR)/build.stamp
+override BUILD_ROOT= $(BUILDDIR)/multistrap
+
+override MULTISTRAP_ROOT_DIR = $(BUILD_ROOT)/root
+override MULTISTRAP_HOOK_DIR = $(BUILD_ROOT)/hooks
+override REPOSITORY_DIR = $(BUILD_ROOT)/repos
+override MULTISTRAP_CFG = $(BUILD_ROOT)/multistrap.cfg
+override MULTISTRAP_IMAGE_TAR = $(BUILD_ROOT)/$(if $(DEBIAN_ARCH),rootfs-$(DEBIAN_ARCH).tar,rootfs.tar)
+override STAMP_FILE = $(BUILD_ROOT)/build.stamp
 
 #
 # Check that CONFIG_REPOS is not empty.
@@ -403,7 +404,7 @@ override CONFIG_HOOKS = $(patsubst $(abspath $(SRCDIR))/%,$(MULTISTRAP_HOOK_DIR)
 
 override INCLUDE_SRCS = $(INCLUDE_HOOKS) $(INCLUDE_REPOS) $(DEFAULT_REPOS)
 
-override DEBIAN_DEFAULT_REPO := $(patsubst $(BUILDDIR)/%,%,$(patsubst $(current_mkfile_dir)/repos/%,$(REPOSITORY_DIR)/defaults/%,$(DEBIAN_DEFAULT_REPO)))
+override DEBIAN_DEFAULT_REPO := $(patsubst $(BUILD_ROOT)/%,%,$(patsubst $(current_mkfile_dir)/repos/%,$(REPOSITORY_DIR)/defaults/%,$(DEBIAN_DEFAULT_REPO)))
 
 #
 # Check that BUILDDIR setting will not clobber sources.
@@ -413,7 +414,8 @@ Ignore invalid build directory: "$(BUILDDIR)"
 Build directory collides with sources
 endef
 
-override BUILDFILE_PATTERNS = $(REPOSITORY_DIR)/% $(MULTISTRAP_HOOK_DIR)/% $(MULTISTRAP_ROOT_DIR)/% $(MULTISTRAP_CFG) $(STAMP_FILE)
+override BUILDFILE_PATTERNS = $(BUILD_ROOT)/%
+#override BUILDFILE_PATTERNS = $(REPOSITORY_DIR)/% $(MULTISTRAP_HOOK_DIR)/% $(MULTISTRAP_ROOT_DIR)/% $(MULTISTRAP_CFG) $(STAMP_FILE)
 
 override define check_builddir_error
 $(if $(filter $(BUILDFILE_PATTERNS),$(INCLUDE_SRCS)),$(error $(builddir_error)),)
@@ -430,11 +432,11 @@ override MULTISTRAP_GENERAL_SECTION = "\#\n\
 [General]\n\
 arch = $(DEBIAN_ARCH)\
 $(if $(DEBIAN_MULTIARCH),\nmultiarch = $(DEBIAN_MULTIARCH)\n,\n)\
-directory = $(patsubst $(abspath $(BUILDDIR))/%,%,$(abspath $(MULTISTRAP_ROOT_DIR)))\n\
-bootstrap = $(patsubst $(abspath $(BUILDDIR))/%,%,$(abspath $(CONFIG_REPOS)))\n\
-aptsources = $(patsubst $(abspath $(BUILDDIR))/%,%,$(abspath $(CONFIG_REPOS)))\n\
-hookdir = $(patsubst $(abspath $(BUILDDIR))/%,%,$(abspath $(MULTISTRAP_HOOK_DIR)))\n\
-tarball = $(patsubst $(abspath $(BUILDDIR))/%,%,$(abspath $(MULTISTRAP_IMAGE_TAR)))\n\
+directory = $(patsubst $(abspath $(BUILD_ROOT))/%,%,$(abspath $(MULTISTRAP_ROOT_DIR)))\n\
+bootstrap = $(patsubst $(abspath $(BUILD_ROOT))/%,%,$(abspath $(CONFIG_REPOS)))\n\
+aptsources = $(patsubst $(abspath $(BUILD_ROOT))/%,%,$(abspath $(CONFIG_REPOS)))\n\
+hookdir = $(patsubst $(abspath $(BUILD_ROOT))/%,%,$(abspath $(MULTISTRAP_HOOK_DIR)))\n\
+tarball = $(patsubst $(abspath $(BUILD_ROOT))/%,%,$(abspath $(MULTISTRAP_IMAGE_TAR)))\n\
 markauto = true\n\
 cleanup = true\n\
 noauth = false \n\
@@ -454,6 +456,7 @@ Makefile                 : $(current_mkfile_path)
 Makefile directory       : $(current_mkfile_dir)
 Source directory         : $(SRCDIR)
 Build directory          : $(BUILDDIR)
+Using build root         : $(BUILD_ROOT)
 Destination directory    : $(DESTDIR)
 
 ================================= MULTISTRAP =================================
@@ -527,7 +530,7 @@ override define RUN_MULTISTRAP
 $(info Generate rootfs (multistrap))
 run_multistrap () \
 { \
-	cd "$(BUILDDIR)"; \
+	cd "$(BUILD_ROOT)"; \
 $(if $(DRY_RUN),multistrap --dry-run -f "$(MULTISTRAP_CFG)" && touch "$(MULTISTRAP_IMAGE_TAR)",multistrap -f "$(MULTISTRAP_CFG)"); \
 }; run_multistrap;
 @echo ""
@@ -535,13 +538,13 @@ endef
 
 override define CALL_CAT_SECTION_DEFAULT
 $(DEFINE_CAT_SECTION_FN) \
-cat_section "$@" "$(patsubst $(BUILDDIR)/%,%,$@)" "default" | tee -a "$(MULTISTRAP_CFG)";
+cat_section "$@" "$(patsubst $(BUILD_ROOT)/%,%,$@)" "default" | tee -a "$(MULTISTRAP_CFG)";
 @echo ""
 endef
 
 override define CALL_CAT_SECTION_LOCAL
 $(DEFINE_CAT_SECTION_FN) \
-cat_section "$@" "$(patsubst $(BUILDDIR)/%,%,$@)" "local" | tee -a "$(MULTISTRAP_CFG)";
+cat_section "$@" "$(patsubst $(BUILD_ROOT)/%,%,$@)" "local" | tee -a "$(MULTISTRAP_CFG)";
 @echo ""
 endef
 
@@ -572,8 +575,9 @@ endef
 
 override define remove_build_files
 $(info Remove build output in: $(BUILDDIR))
-rm -rf "$(REPOSITORY_DIR)" "$(MULTISTRAP_ROOT_DIR)" "$(MULTISTRAP_HOOK_DIR)"
-rm -f "$(MULTISTRAP_CFG)" "$(STAMP_FILE)" "$(MULTISTRAP_IMAGE_TAR)"
+rm -rf "$(BUILD_ROOT)"
+#rm -rf "$(REPOSITORY_DIR)" "$(MULTISTRAP_ROOT_DIR)" "$(MULTISTRAP_HOOK_DIR)"
+#rm -f "$(MULTISTRAP_CFG)" "$(STAMP_FILE)" "$(MULTISTRAP_IMAGE_TAR)"
 @echo ""
 endef
 
@@ -603,18 +607,18 @@ $(MULTISTRAP_CFG): | $(STAMP_FILE)
 	$(info Generate $(MULTISTRAP_CFG))
 	echo $(subst \n ,\n,$(MULTISTRAP_GENERAL_SECTION)) | tee $(MULTISTRAP_CFG)
 
-$(BUILDDIR)/hooks/%: $(INCLUDE_HOOKS)
+$(BUILD_ROOT)/hooks/%: $(INCLUDE_HOOKS)
 	$(INSTALL_HOOK_SCRIPT)
 
-$(BUILDDIR)/repos/%.conf: $(INCLUDE_REPOS) | $(MULTISTRAP_CFG)
+$(BUILD_ROOT)/repos/%.conf: $(INCLUDE_REPOS) | $(MULTISTRAP_CFG)
 	$(INSTALL_REPO_FILE)
 	$(CALL_CAT_SECTION_LOCAL)
 
-$(BUILDDIR)/repos/defaults/%.conf: $(current_mkfile_dir)/repos/%.conf | $(MULTISTRAP_CFG)
+$(BUILD_ROOT)/repos/defaults/%.conf: $(current_mkfile_dir)/repos/%.conf | $(MULTISTRAP_CFG)
 	$(INSTALL_REPO_FILE)
 	$(CALL_CAT_SECTION_DEFAULT)
 
-$(BUILDDIR)/%: |
+$(BUILD_ROOT)/%: |
 	$(CREATE_BUILD_DIR)
 
 $(MULTISTRAP_IMAGE_TAR): | configure $(CONFIG_HOOKS)
@@ -646,4 +650,4 @@ clean: | -remove-build-files
 	$(check_builddir_error)
 	$(if $(strip $(CONFIG_REPOS)),,$(error $(empty_config_repos_error)))
 
-.PHONY: configure build update clean -separator -remove-build-files help buildinfo reconfigure rebuild
+.PHONY: configure build clean -separator -remove-build-files help buildinfo reconfigure rebuild

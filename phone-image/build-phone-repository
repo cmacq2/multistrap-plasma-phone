@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# A simple wrapper around the driver/driver.sh for reprepro that uses matching defaults:
+#
+# SRCDIR = phone-image/reprepro
+# BUILDDIR = <directory from which the wrapper is invoked>
+# DEBIAN_ARCH = aarch64
+# REPO_CODE_NAME = sparkly
+# REPO_VERSION = 1.0
+# REPO_KEY = default
+# UPLOAD_KEYS = default
+# REPO_DOMAIN_NAME = `hostname -f`
+#
+. "`dirname $0`/../multistrap/driver.sh" && \
+run_driver_script HELP_DESCRIPTION="build Plasma Mobile phone images" SRCDIR="\$SCRIPT_DIR/reprepro" BUILDDIR="$(pwd)" DEBIAN_ARCH=aarch64 \
+                  REPO_CODE_NAME=sparkly REPO_VERSION=1.0 REPO_DOMAIN_NAME="`hostname -f`" REPO_KEY=default UPLOAD_KEYS=default -- "$@"

@@ -21,10 +21,10 @@ At minimum the following steps are required to create project that can be turned
     touch project_dir/build.sh
     chmod u+x project_dir/build.sh
  ```
- 2. Edit the `build.sh` script to wrap /multistrap/driver.sh like this:
+ 2. Edit the `build.sh` script to wrap /driver/driver.sh like this:
  ```sh
     #!/bin/sh
-    . path/to/multistrap/driver.sh && run_driver HELP_DESCRIPTION="builds my project" -- "$@"
+    . path/to/driver/driver.sh && run_driver multistrap HELP_DESCRIPTION="builds my project" -- "$@"
  ```
  3. Optional: add a repository `*.conf` file. It will be merged into a configuration file for multistrap during build.
  ```sh
@@ -42,7 +42,7 @@ At minimum the following steps are required to create project that can be turned
  ```sh
     project_dir/build.sh -h # get help
     project_dir/build.sh -t help # get Makefile 'help' output
-    project_dir/build.sh -t buildinfo DEBIAN_ARCH
+    project_dir/build.sh -t buildinfo DEBIAN_ARCH=i386
  ```
  6. (Re)build with your chosen options:
  ```sh

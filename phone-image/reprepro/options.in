@@ -1,0 +1,7 @@
+verbose
+basedir @BASEDIR@
+outdir @POOL@
+distdir @POOL@/dists
+logdir @LOG@
+listdir @LISTS@
+dbdir @DB@

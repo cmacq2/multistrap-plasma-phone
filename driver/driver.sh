@@ -1,9 +1,10 @@
 #!/bin/sh
 
 #
-# A driver script for the Makefile to provide useful defaults.
+# A driver script for the various Makefile modules to provide useful defaults.
 # This script is not meant to be executed directly (SRCDIR would be wrong).
-# Instead a wrapper should be used that sources this script and calls run_driver_script.
+# Instead a wrapper should be used that sources this script and calls
+# run_driver_script.
 #
 # See run_driver_script (at end of file) for details.
 #
@@ -288,19 +289,41 @@ set_default ()
     fi
 }
 
+default_help_desc ()
+{
+    case "$1" in
+    multistrap)
+        echo -n "generates Debian images using multistrap"
+    ;;
+    reprepro)
+        echo -n "generates Debian repository using reprepro"
+    ;;
+    *)
+        return 1
+    ;;
+    esac
+}
+
 #
 # Main event: the driver script logic.
 # Should be called from inside an appropriately named wrapper.
 #
-# Usage: run_driver_script [caller_default_opts] -- "$@"
+# Usage: run_driver_script <module> [caller_default_opts] -- "$@"
 # Minimal example (wrapper):
 # #!/bin/sh
-# . /path/to/multistrap/driver.sh && run_driver_script -- "$@"
+# . /path/to/driver/driver.sh && run_driver_script reprepro -- "$@"
 #
 # An example (wrapper) set the SRCDIR default to $(pwd)/src directory:
 # #!/bin/sh
-# . /path/to/multistrap/driver.sh && run_driver_script SRCDIR="$(pwd)/src" -- "$@"
+# . /path/to/driver/driver.sh && run_driver_script multistrap SRCDIR="$(pwd)/src" -- "$@"
 #
+# module: required:
+#    name of the module (directory with Makefile) which the driver script
+#    provides a frontend for. The following modules are currently known:
+#     * multistrap
+#     * reprepro
+#    run_driver_script will abort the script with an error if the module is
+#    invalid (or missing).
 # caller_default_opts: optional:
 #    override default values for Makefile variables.
 #    Use HELP_DESCRIPTION= to set a descriptive string of what the caller
@@ -311,8 +334,8 @@ set_default ()
 #     * BUILDDIR (run_driver_script default value for BUILDDIR)
 #     * SCRIPT_DIR (directory in which the wrapper is located)
 #     * INVOKE_DIR (directory from which the script was invoked, i.e. $(pwd))
-#    To refer to these variables you need to escape the $ sign to defer variable
-#    expansionlike this: "\$SRCDIR"
+#    To refer to these variables you need to escape the $ sign to defer
+#    variable expansionlike this: "\$SRCDIR"
 #
 # --: required:
 #    terminates caller_default_opts
@@ -334,13 +357,14 @@ run_driver_script ()
         SCRIPT_DIR="$(pwd)"
         cd "$INVOKE_DIR"
     fi
-
-    HELP_DESCRIPTION="generates Debian images using multistrap"
-    SRCDIR="$SCRIPT_DIR/multistrap"
+    DRIVER_MODULE="$1"
     BUILDDIR="$INVOKE_DIR"
     MAKE_OPTIONS=""
     MAKE_TARGETS=""
     DEFAULTS_CONSUMED=""
+    HELP_DESCRIPTION="`default_help_desc $DRIVER_MODULE`" || exit_msg "run_driver_script: internal error detected in: '$0'.\nNo default help description available for: '$DRIVER_MODULE'." 255
+    SRCDIR="$SCRIPT_DIR/$DRIVER_MODULE"
+    shift 1
     last_arg=""
     arg=""
 
@@ -399,7 +423,7 @@ run_driver_script ()
         exit_msg "A <make-target> is required." 254
     else
         iterate_default_options pass_to_make_options
-        eval make -f "'$SCRIPT_DIR/../multistrap/Makefile'" $MAKE_OPTIONS $MAKE_TARGETS
+        eval make -f "'$SCRIPT_DIR/../$DRIVER_MODULE/Makefile'" $MAKE_OPTIONS $MAKE_TARGETS
         exit $?
     fi
 }
