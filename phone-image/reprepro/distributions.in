@@ -1,7 +1,7 @@
 Codename: @CODENAME@
 Components: plasma-mobile
-Suite: unstable
-AlsoAcceptFor: sid unstable @CODENAME@
+Suite: @SUITE@
+AlsoAcceptFor: @SUITE@ @CODENAME@
 Architectures: @ARCH@ source
 Origin: @DOMAIN@
 Version: @VERSION@

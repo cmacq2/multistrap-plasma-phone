@@ -57,6 +57,9 @@ REPO_KEY                 : specify the key to use for signing the repository.
 DEBIAN_ARCH              : specify binary architecture of the repository.
                            All instances of @ARCH@ in configuration
                            templates will be replaced by this value.
+DEBIAN_SUITE             : specify the package 'suite' of the repository.
+                           All instances of @SUITE@ in configuration
+                           templates will be replaced by this value.
 UPLOAD_KEYS              : specify a list of signing keys which will be
                            accepted for 'uploads' by default. Multiple keys
                            should be separated using spaces.
@@ -130,7 +133,30 @@ REPO_DOMAIN_NAME ?= $(shell hostname -f)
 REPO_KEY ?= default
 UPLOAD_KEYS ?= default
 DEBIAN_ARCH ?=
+DEBIAN_SUITE ?= unstable
 
+#
+# Check if suite name is valid
+# Currently we support 'stable', 'testing', 'unstable'.
+# Alias 'sid' and 'Sid' to 'unstable'
+#
+
+override debian_valid_suite_names = stable testing unstable
+override unstable_suite_aliases = Sid sid
+
+override define debian_invalid_suite_warning
+
+Ignore invalid suite name: "$(DEBIAN_SUITE)"
+endef
+
+ifeq "$(filter $(unstable_suite_aliases),$(DEBIAN_SUITE))" "$(lastword $(DEBIAN_SUITE))"
+override DEBIAN_SUITE = unstable
+endif
+
+ifneq "$(filter $(DEBIAN_VALID_SUITENAMES),$(DEBIAN_SUITE))" "$(lastword $(DEBIAN_SUITE))"
+$(warning $(debian_invalid_suite_warning))
+override DEBIAN_SUITE = unstable
+endif
 
 DB_DIR ?=
 LIST_DIR ?=
@@ -207,6 +233,7 @@ Destination directory    : $(DESTDIR)
 ================================== REPREPRO ==================================
 
 Code name                : $(REPO_CODE_NAME)
+Suite                    : $(DEBIAN_SUITE)
 Version                  : $(REPO_VERSION)
 Domain name              : $(REPO_DOMAIN_NAME)
 Repository signing key   : $(REPO_KEY)
@@ -259,7 +286,8 @@ REPO_CODE_NAME="$(REPO_CODE_NAME)"; \
 REPO_DOMAIN_NAME="$(REPO_DOMAIN_NAME)"; \
 REPO_KEY="$(REPO_KEY)"; \
 REPO_VERSION="$(REPO_VERSION)"; \
-DEBIAN_ARCH="$(DEBIAN_ARCH)";
+DEBIAN_ARCH="$(DEBIAN_ARCH)"; \
+DEBIAN_SUITE="$(DEBIAN_SUITE)";
 endef
 
 override define DEFINE_CONFIGURE_UPLOADERS

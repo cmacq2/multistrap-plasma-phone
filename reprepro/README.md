@@ -50,7 +50,7 @@ At minimum the following steps are required to create project that can be turned
  ```
 
 Please note: rebuilding/reconfiguring the repository currently throws away the old data, including any packages you uploaded. So it's not very
-useful other than to start over from scratch. For updating your repository, set up the incoming queue in your repository configuration
+useful other than to start over from scratch. To update your repository, set up the incoming queue in your repository configuration
 (project_dir/reprepro/incoming.in), upload the packages with *.changes files to the incoming directory and use the `build` target to process
-incoming packages.
+incoming packages instead.
 

@@ -7,6 +7,7 @@ s:@CODENAME@:$REPO_CODE_NAME:
 s:@VERSION@:$REPO_VERSION:
 s:@DOMAIN@:$REPO_DOMAIN_NAME:
 s:@ARCH@:$DEBIAN_ARCH:
+s:@SUITE@:$DEBIAN_SUITE:
 #
 # repokey should be something that maps to a
 # unique value as reported by e.g.:
