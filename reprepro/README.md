@@ -24,7 +24,7 @@ At minimum the following steps are required to create project that can be turned
  2. Edit the `build.sh` script to wrap /driver/driver.sh like this:
  ```sh
     #!/bin/sh
-    . path/to/driver/driver.sh && run_driver reprepro HELP_DESCRIPTION="builds my repo" -- "$@"
+    /path/to/driver/driver.sh reprepro HELP_DESCRIPTION="builds my repo" -- "$@"
  ```
  3. Add repository configuration templates to project_dir/reprepro.
  In particular add project_dir/reprepro/distributions.in file to configure the distributions in your repository, as well

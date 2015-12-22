@@ -3,8 +3,8 @@
 #
 # A driver script for the various Makefile modules to provide useful defaults.
 # This script is not meant to be executed directly (SRCDIR would be wrong).
-# Instead a wrapper should be used that sources this script and calls
-# run_driver_script.
+# Instead a wrapper should be used that executes this script and passes it
+# (additional) arguments.
 #
 # See run_driver_script (at end of file) for details.
 #
@@ -306,16 +306,16 @@ default_help_desc ()
 
 #
 # Main event: the driver script logic.
-# Should be called from inside an appropriately named wrapper.
+# Should be called via executing an appropriately named wrapper.
 #
 # Usage: run_driver_script <module> [caller_default_opts] -- "$@"
 # Minimal example (wrapper):
 # #!/bin/sh
-# . /path/to/driver/driver.sh && run_driver_script reprepro -- "$@"
+# /path/to/driver/driver.sh reprepro -- "$@"
 #
 # An example (wrapper) set the SRCDIR default to $(pwd)/src directory:
 # #!/bin/sh
-# . /path/to/driver/driver.sh && run_driver_script multistrap SRCDIR="$(pwd)/src" -- "$@"
+# /path/to/driver/driver.sh multistrap SRCDIR="$(pwd)/src" -- "$@"
 #
 # module: required:
 #    name of the module (directory with Makefile) which the driver script
@@ -332,7 +332,7 @@ default_help_desc ()
 #    The following directory variables are available:
 #     * SRCDIR (run_driver_script default value for SRCDIR)
 #     * BUILDDIR (run_driver_script default value for BUILDDIR)
-#     * SCRIPT_DIR (directory in which the wrapper is located)
+#     * SCRIPT_DIR (directory in which driver.sh is located)
 #     * INVOKE_DIR (directory from which the script was invoked, i.e. $(pwd))
 #    To refer to these variables you need to escape the $ sign to defer
 #    variable expansionlike this: "\$SRCDIR"
@@ -363,7 +363,7 @@ run_driver_script ()
     MAKE_TARGETS=""
     DEFAULTS_CONSUMED=""
     HELP_DESCRIPTION="`default_help_desc $DRIVER_MODULE`" || exit_msg "run_driver_script: internal error detected in: '$0'.\nNo default help description available for: '$DRIVER_MODULE'." 255
-    SRCDIR="$SCRIPT_DIR/$DRIVER_MODULE"
+    SRCDIR="$SCRIPT_DIR/../$DRIVER_MODULE"
     shift 1
     last_arg=""
     arg=""
@@ -427,3 +427,5 @@ run_driver_script ()
         exit $?
     fi
 }
+
+run_driver_script "$@"

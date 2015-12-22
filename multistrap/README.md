@@ -24,7 +24,7 @@ At minimum the following steps are required to create project that can be turned
  2. Edit the `build.sh` script to wrap /driver/driver.sh like this:
  ```sh
     #!/bin/sh
-    . path/to/driver/driver.sh && run_driver multistrap HELP_DESCRIPTION="builds my project" -- "$@"
+    /path/to/driver/driver.sh multistrap HELP_DESCRIPTION="builds my project" -- "$@"
  ```
  3. Optional: add a repository `*.conf` file. It will be merged into a configuration file for multistrap during build.
  ```sh
