@@ -347,15 +347,12 @@ default_help_desc ()
 run_driver_script ()
 {
     INVOKE_DIR="$(pwd)"
-    SCRIPT_DIR="$(dirname "$0")"
+    SCRIPT_DIR="$(readlink -f "$0")"
+    SCRIPT_DIR="$(dirname "$SCRIPT_DIR")"
 
     if [ -z "$SCRIPT_DIR" ]
     then
         SCRIPT_DIR="$INVOKE_DIR"
-    else
-        cd "$SCRIPT_DIR"
-        SCRIPT_DIR="$(pwd)"
-        cd "$INVOKE_DIR"
     fi
     DRIVER_MODULE="$1"
     BUILDDIR="$INVOKE_DIR"
