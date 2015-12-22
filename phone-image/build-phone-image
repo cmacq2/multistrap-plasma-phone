@@ -6,5 +6,5 @@
 # BUILDDIR = <directory from which the wrapper is invoked>
 # DEBIAN_ARCH = aarch64
 #
-. "`dirname $0`/../multistrap/driver.sh" && \
+. "`dirname $0`/../driver/driver.sh" && \
 run_driver_script HELP_DESCRIPTION="build Plasma Mobile phone images" SRCDIR="\$SCRIPT_DIR/multistrap" BUILDDIR="$(pwd)" DEBIAN_ARCH=aarch64 -- "$@"
