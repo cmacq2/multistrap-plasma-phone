@@ -12,5 +12,6 @@
 # REPO_DOMAIN_NAME = `hostname -f`
 #
 . "`dirname $0`/../driver/driver.sh" && \
-run_driver_script HELP_DESCRIPTION="build Plasma Mobile phone repository" SRCDIR="\$SCRIPT_DIR/reprepro" BUILDDIR="$(pwd)" DEBIAN_ARCH=aarch64 \
+run_driver_script reprepro HELP_DESCRIPTION="build Plasma Mobile phone repository" \
+                  SRCDIR="\$SCRIPT_DIR/reprepro" BUILDDIR="$(pwd)" DEBIAN_ARCH=aarch64 \
                   REPO_CODE_NAME=sparkly REPO_VERSION=1.0 REPO_DOMAIN_NAME="`hostname -f`" REPO_KEY=default UPLOAD_KEYS=default -- "$@"
