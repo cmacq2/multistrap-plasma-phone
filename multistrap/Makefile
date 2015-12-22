@@ -522,7 +522,7 @@ cat_section () \
 		fi; \
 	fi; \
 	cat "$$1"; \
-	echo ""; \
+	echo "\n"; \
 };
 endef
 
@@ -587,9 +587,17 @@ rmdir "$(BUILDDIR)"
 @echo ""
 endef
 
+ifneq "$(abspath $(BUILDDIR))" "$(abspath .)"
 override define remove_builddir
 $(if $(wildcard $(BUILDDIR)/*),$(info $(clean_files_left_info)),$(rm_builddir))
 endef
+endif
+
+ifeq "$(abspath $(BUILDDIR))" "$(abspath .)"
+override define remove_builddir
+$(if $(wildcard $(BUILDDIR)/*),$(info $(clean_files_left_info)),$(info "Build directory is same as working directory; leaving directory in place: $(BUILDDIR)"))
+endef
+endif
 
 help: |
 	$(info $(BUILD_HELP))

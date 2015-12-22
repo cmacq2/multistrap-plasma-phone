@@ -353,9 +353,17 @@ rmdir "$(BUILDDIR)"
 @echo ""
 endef
 
+ifneq "$(abspath $(BUILDDIR))" "$(abspath .)"
 override define remove_builddir
 $(if $(wildcard $(BUILDDIR)/*),$(info $(clean_files_left_info)),$(rm_builddir))
 endef
+endif
+
+ifeq "$(abspath $(BUILDDIR))" "$(abspath .)"
+override define remove_builddir
+$(if $(wildcard $(BUILDDIR)/*),$(info $(clean_files_left_info)),$(info "Build directory is same as working directory; leaving directory in place: $(BUILDDIR)"))
+endef
+endif
 
 override define process_updates
 reprepro --confdir "$(CONF_DIR)" --basedir "$(BASE_DIR)" \
